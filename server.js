@@ -1,13 +1,11 @@
 import http from 'node:http';
-import { convertCurrency } from './src/currencyService.js';
+import { convertCurrency, createError } from './src/currencyService.js';
 
 const parseRequestBody = (req) => new Promise((resolve, reject) => {
   let body = '';
 
   req.on('error', () => {
-    const error = new Error('Unable to read the request body.');
-    error.statusCode = 400;
-    reject(error);
+    reject(createError(400, 'Unable to read the request body.'));
   });
 
   req.on('data', (chunk) => {

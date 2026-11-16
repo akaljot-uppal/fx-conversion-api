@@ -7,7 +7,7 @@ const EXCHANGE_RATES = Object.freeze({
     JPY: 109.50
 });
 
-const createError = (statusCode, message) => {
+export const createError = (statusCode, message) => {
     const error = new Error(message);
     error.statusCode = statusCode;
     return error;
