@@ -1,0 +1,22 @@
+{
+  "name": "fx-conversion-api",
+  "version": "1.0.0",
+  "description": "A simple and small node.js REST API that converts amounts between predefined currencies.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akaljot-uppal/fx-conversion-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/akaljot-uppal/fx-conversion-api/issues"
+  },
+  "homepage": "https://github.com/akaljot-uppal/fx-conversion-api#readme"
+}
