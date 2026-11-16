@@ -4,6 +4,12 @@ import { convertCurrency } from './src/currencyService.js';
 const parseRequestBody = (req) => new Promise((resolve, reject) => {
   let body = '';
 
+  req.on('error', () => {
+    const error = new Error('Unable to read the request body.');
+    error.statusCode = 400;
+    reject(error);
+  });
+
   req.on('data', (chunk) => {
     body += chunk;
   });
@@ -16,11 +22,9 @@ const parseRequestBody = (req) => new Promise((resolve, reject) => {
 
     try {
       resolve(JSON.parse(body));
-    } catch (error) {
-      reject(new Error('Invalid request payload, please provide a valid JSON object with to, from, and amount fields'));
+    } catch {
+      reject(new Error('Invalid JSON in request body, expected a JSON object with "from", "to", and "amount" fields.'));
     }
-
-    req.on('error', reject);
   });
 });
 
@@ -31,7 +35,7 @@ const server = http.createServer(async (req, res) => {
 
   if (pathname !== '/convert') {
     res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Endpoint Not Found, only request to /convert are allowed' }));
+    res.end(JSON.stringify({ error: 'Endpoint not found. Use POST /convert.' }));
     return;
   }
 
@@ -48,9 +52,12 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(result));
   } catch (error) {
-    const statusCode = error.statusCode || 400;
+    const statusCode = Number.isInteger(error?.statusCode) ? error.statusCode : 500;
+    const message = statusCode === 500
+      ? 'An unexpected error occurred while processing the conversion request.'
+      : error.message;
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: error.message }));
+    res.end(JSON.stringify({ error: message }));
   }
 });
 

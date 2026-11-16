@@ -11,28 +11,37 @@ const throwError = (statusCode, message) => {
     const error = new Error(message);
     error.statusCode = statusCode;
     throw error;
-}
+};
 
-const normalizeCurrencyCode = (code) => {
+const normalizeCurrencyCode = (code, field) => {
     if (typeof code !== 'string') {
-        throwError(400, 'Invalid currency code, please provide a valid string as for currency codes');
+        throwError(400, `Invalid field "${field}", expected a non-empty string.`);
     }
-    return code.toUpperCase();
+    const normalizedCode = code.trim().toUpperCase();
+    if (!normalizedCode) {
+        throwError(400, `Missing required field "${field}".`);
+    }
+    return normalizedCode;
 };
 
 const validateConversionRequest = (payload) => {
-
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
-        throwError(400, 'Invalid request payload, please provide a valid JSON object with to, from, and amount fields');
+        throwError(400, 'Invalid request payload, expected a JSON object with "from", "to", and "amount" fields.');
     }
 
-    const from = normalizeCurrencyCode(payload.from);
-    const to = normalizeCurrencyCode(payload.to);
+    if (payload.from === undefined || payload.from === null) {
+        throwError(400, 'Missing required field "from".');
+    }
+    if (payload.to === undefined || payload.to === null) {
+        throwError(400, 'Missing required field "to".');
+    }
+    if (payload.amount === undefined || payload.amount === null) {
+        throwError(400, 'Missing required field "amount".');
+    }
+
+    const from = normalizeCurrencyCode(payload.from, 'from');
+    const to = normalizeCurrencyCode(payload.to, 'to');
     const amount = payload.amount;
-
-    if (!from || !to || !amount) {
-        throwError(400, 'Missing required fields in payload, please provide valid to, from, and amount fields');
-    }
 
     if (!(from in EXCHANGE_RATES)) {
         throwError(400, `Unsupported currency: ${from}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
@@ -42,8 +51,8 @@ const validateConversionRequest = (payload) => {
         throwError(400, `Unsupported currency: ${to}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
     }
 
-    if (typeof amount !== 'number' || isNaN(amount) || amount < 0 || !Number.isFinite(amount)) {
-        throwError(400, 'Invalid amount, please provide a valid positive number');
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+        throwError(400, 'Invalid amount, expected a finite, non-negative number.');
     }
 
     return {to, from, amount}
