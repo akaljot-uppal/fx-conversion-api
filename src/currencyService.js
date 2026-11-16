@@ -7,28 +7,40 @@ const EXCHANGE_RATES = Object.freeze({
     JPY: 109.50
 });
 
+const normalizeCurrencyCode = (code) => {
+    if (typeof code !== 'string') {
+        throw new Error('Invalid currency code, please provide a valid string as for currency codes');
+    }
+    return code.toUpperCase();
+};
+
 const validateConversionRequest = (payload) => {
+
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
         throw new Error('Invalid request payload, please provide a valid JSON object with to, from, and amount fields');
     }
+    
+    const from = normalizeCurrencyCode(payload.from);
+    const to = normalizeCurrencyCode(payload.to);
+    const amount = payload.amount;
 
-    if (!payload.from || !payload.to || !payload.amount) {
+    if (!from || !to || !amount) {
         throw new Error('Missing required fields in payload, please provide valid to, from, and amount fields');
     }
 
-    if (!(payload.from in EXCHANGE_RATES)) {
-        throw new Error(`Unsupported currency: ${payload.from}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
+    if (!(from in EXCHANGE_RATES)) {
+        throw new Error(`Unsupported currency: ${from}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
     }
 
-    if (!(payload.to in EXCHANGE_RATES)) {
-        throw new Error(`Unsupported currency: ${payload.to}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
+    if (!(to in EXCHANGE_RATES)) {
+        throw new Error(`Unsupported currency: ${to}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
     }
 
-    if (typeof payload.amount !== 'number' || isNaN(payload.amount) || payload.amount < 0 || !Number.isFinite(payload.amount)) {
+    if (typeof amount !== 'number' || isNaN(amount) || amount < 0 || !Number.isFinite(amount)) {
         throw new Error('Invalid amount, please provide a valid positive number');
     }
 
-    return {to: payload.to, from: payload.from, amount: payload.amount}
+    return {to, from, amount}
 };
 
 export const convertCurrency = (payload) => {
