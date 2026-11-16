@@ -17,18 +17,24 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ error: 'Method Not Allowed, only POST requests are allowed for this endpoint' }));
     return;
   }
-  
+
   let body = '';
   req.on('data', (chunk) => {
     body += chunk;
   });
 
   req.on('end', () => {
-    const payload = body ? JSON.parse(body) : {};
-    const result = convertCurrency(payload);
+    try {
+      const payload = body ? JSON.parse(body) : {};
+      const result = convertCurrency(payload);
 
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(result));
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    }
+    catch (error) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Invalid request payload, please provide a valid JSON object with to, from, and amount fields' }));
+    }
   });
 });
 
