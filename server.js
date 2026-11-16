@@ -1,6 +1,8 @@
 import http from 'node:http';
 import { convertCurrency, createError } from './src/currencyService.js';
 
+const MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024;
+
 const parseRequestBody = (req) => new Promise((resolve, reject) => {
   const chunks = [];
 
@@ -9,6 +11,10 @@ const parseRequestBody = (req) => new Promise((resolve, reject) => {
   });
 
   req.on('data', (chunk) => {
+    if (Buffer.byteLength(chunk) > MAX_REQUEST_BODY_SIZE) {
+      reject(createError(413, 'Request body too large.'));
+      return;
+    }
     chunks.push(chunk);
   });
 
