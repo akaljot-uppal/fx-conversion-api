@@ -5,13 +5,22 @@ const MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024;
 
 const parseRequestBody = (req) => new Promise((resolve, reject) => {
   const chunks = [];
+  let bodySize = 0;
+  let bodyTooLarge = false;
 
   req.on('error', () => {
     reject(createError(400, 'Unable to read the request body.'));
   });
 
   req.on('data', (chunk) => {
-    if (Buffer.byteLength(chunk) > MAX_REQUEST_BODY_SIZE) {
+    if (bodyTooLarge) {
+      return;
+    }
+
+    bodySize += chunk.length;
+    if (bodySize > MAX_REQUEST_BODY_SIZE) {
+      bodyTooLarge = true;
+      chunks.length = 0;
       reject(createError(413, 'Request body too large.'));
       return;
     }
@@ -19,6 +28,10 @@ const parseRequestBody = (req) => new Promise((resolve, reject) => {
   });
 
   req.on('end', () => {
+    if (bodyTooLarge) {
+      return;
+    }
+
     try {
       const rawBody = Buffer.concat(chunks).toString();
       const body = JSON.parse(rawBody);
