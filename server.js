@@ -2,7 +2,22 @@ import http from 'node:http';
 import { convertCurrency } from './src/currencyService.js';
 
 const server = http.createServer((req, res) => {
+  const { method, url } = req;
+  const parsedUrl = new URL(url, `http://${req.headers.host}`);
+  const pathname = parsedUrl.pathname;
 
+  if (pathname !== '/convert') {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Endpoint Not Found, only request to /convert are allowed' }));
+    return;
+  }
+
+  if (method !== "POST") {
+    res.writeHead(405, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Method Not Allowed, only POST requests are allowed for this endpoint' }));
+    return;
+  }
+  
   let body = '';
   req.on('data', (chunk) => {
     body += chunk;
