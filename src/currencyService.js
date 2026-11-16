@@ -65,6 +65,10 @@ export const convertCurrency = (payload) => {
 
     const convertedAmount = amount * exchangeRate;
 
+    if (!Number.isFinite(convertedAmount)) {
+        throw createError(400, 'Amount is too large to convert.');
+    }
+
     return {
         from,
         to,
