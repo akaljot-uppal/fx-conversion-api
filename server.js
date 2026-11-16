@@ -1,8 +1,20 @@
 import http from 'node:http';
+import { convertCurrency } from './src/currencyService.js';
 
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Hello, World!\n');
+
+  let body = '';
+  req.on('data', (chunk) => {
+    body += chunk;
+  });
+
+  req.on('end', () => {
+    const payload = body ? JSON.parse(body) : {};
+    const result = convertCurrency(payload);
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(result));
+  });
 });
 
 const PORT = process.env.PORT || 3000;

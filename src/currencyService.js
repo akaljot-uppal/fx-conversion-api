@@ -7,7 +7,7 @@ const EXCHANGE_RATES = Object.freeze({
     JPY: 109.50
 });
 
-const convertCurrency = (payload) => {
+export const convertCurrency = (payload) => {
     const { from, to, amount } = payload;
 
     const exchangeRate = EXCHANGE_RATES[to] / EXCHANGE_RATES[from];
