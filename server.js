@@ -30,9 +30,24 @@ const parseRequestBody = (req) => new Promise((resolve, reject) => {
 });
 
 const server = http.createServer(async (req, res) => {
+  try {
   const { method, url } = req;
-  const parsedUrl = new URL(url, `http://${req.headers.host}`);
-  const pathname = parsedUrl.pathname;
+  let pathname;
+  
+  try {
+    pathname = new URL(url, `http://localhost`).pathname;
+  }
+  catch {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid request URL.' }));
+    return;
+  }
+
+  if (typeof url !== 'string') {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Invalid request URL.' }));
+    return;
+  }
 
   if (pathname !== '/convert') {
     res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -46,7 +61,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
   
-  try {
     const payload = await parseRequestBody(req);
     const result = convertCurrency(payload);
 
