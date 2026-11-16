@@ -89,7 +89,8 @@ Common validation errors include:
 
 ## Running the API
 
-**Ensure you have Node installed**
+**Note: Ensure you have Node installed**
+
 Install dependencies if needed (the project currently has no external dependencies), then start the server:
 
 ```bash
