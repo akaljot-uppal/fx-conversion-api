@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { convertCurrency } from './src/currencyService.js';
 
-const parseRequestBody = (req) => {
+const parseRequestBody = (req) => new Promise((resolve, reject) => {
   let body = '';
 
   req.on('data', (chunk) => {
@@ -9,17 +9,22 @@ const parseRequestBody = (req) => {
   });
 
   req.on('end', () => {
-    if (!body) return {};
+    if (!body) {
+      resolve({});
+      return;
+    }
 
     try {
-      return JSON.parse(body);
+      resolve(JSON.parse(body));
     } catch (error) {
-      throw new Error('Invalid request payload, please provide a valid JSON object with to, from, and amount fields');
+      reject(new Error('Invalid request payload, please provide a valid JSON object with to, from, and amount fields'));
     }
-  });
-}
 
-const server = http.createServer((req, res) => {
+    req.on('error', reject);
+  });
+});
+
+const server = http.createServer(async (req, res) => {
   const { method, url } = req;
   const parsedUrl = new URL(url, `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
@@ -37,7 +42,7 @@ const server = http.createServer((req, res) => {
   }
   
   try {
-    const payload = parseRequestBody(req);
+    const payload = await parseRequestBody(req);
     const result = convertCurrency(payload);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
