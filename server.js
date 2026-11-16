@@ -2,26 +2,23 @@ import http from 'node:http';
 import { convertCurrency, createError } from './src/currencyService.js';
 
 const parseRequestBody = (req) => new Promise((resolve, reject) => {
-  let body = '';
+  const chunks = [];
 
   req.on('error', () => {
     reject(createError(400, 'Unable to read the request body.'));
   });
 
   req.on('data', (chunk) => {
-    body += chunk;
+    chunks.push(chunk);
   });
 
   req.on('end', () => {
-    if (!body) {
-      resolve({});
-      return;
-    }
-
     try {
-      resolve(JSON.parse(body));
+      const rawBody = Buffer.concat(chunks).toString();
+      const body = JSON.parse(rawBody);
+      resolve(body);
     } catch {
-      reject(new Error('Invalid JSON in request body, expected a JSON object with "from", "to", and "amount" fields.'));
+      reject(createError(400, 'Invalid JSON in request body, expected a JSON object with "from", "to", and "amount" fields.'));
     }
   });
 });
