@@ -1,4 +1,4 @@
-const EXCHANGE_RATES = Object.freeze({
+export const EXCHANGE_RATES = Object.freeze({
     CAD: 1.00,
     USD: 0.72,
     EUR: 0.66,
