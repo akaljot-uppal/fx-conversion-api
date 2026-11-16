@@ -43,12 +43,12 @@ const validateConversionRequest = (payload) => {
     const to = normalizeCurrencyCode(payload.to, 'to');
     const amount = payload.amount;
 
-    if (!(from in EXCHANGE_RATES)) {
-        throwError(400, `Unsupported currency: ${from}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
+    if (!(Object.hasOwn(EXCHANGE_RATES, from))) {
+        throwError(400, `Unsupported currency "${from}". Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
     }
 
-    if (!(to in EXCHANGE_RATES)) {
-        throwError(400, `Unsupported currency: ${to}. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
+    if (!(Object.hasOwn(EXCHANGE_RATES, to))) {
+        throwError(400, `Unsupported currency "${to}". Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(', ')}`);
     }
 
     if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
