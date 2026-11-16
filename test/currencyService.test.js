@@ -8,7 +8,6 @@ test('converts every supported currency pair', async (t) => {
       await t.test(`${from} to ${to}`, () => {
         const result = convertCurrency({ from, to, amount: 100 });
         const exchangeRate = toRate / fromRate;
-
         assert.deepEqual(result, {
           from,
           to,
@@ -63,4 +62,78 @@ test('supports zero amount conversion', () => {
     convertedAmount: 0.00,
     exchangeRate: 0.72
   });
+});
+
+test('rejects invalid payload shapes', async (t) => {
+  for (const payload of [undefined, null, [], 'payload', 42]) {
+    await t.test(`rejects ${String(payload)}`, () => {
+      assert.throws(
+        () => convertCurrency(payload),
+        { statusCode: 400, message: "Invalid request payload, expected a JSON object with 'from', 'to', and 'amount' fields." }
+      );
+    });
+  }
+});
+
+test('rejects each missing required field', async (t) => {
+  for (const field of ['from', 'to', 'amount']) {
+    for (const missingValue of [undefined, null]) {
+      await t.test(`${field} is ${String(missingValue)}`, () => {
+        const payload = { from: 'CAD', to: 'USD', amount: 1, [field]: missingValue };
+        assert.throws(
+          () => convertCurrency(payload),
+          { statusCode: 400, message: `Missing required field '${field}'.` }
+        );
+      });
+    }
+  }
+});
+
+test('rejects currency codes that are not non-empty strings', async (t) => {
+  for (const field of ['from', 'to']) {
+    for (const code of [1, false, {}, '', '  ']) {
+      await t.test(`${field}=${JSON.stringify(code)}`, () => {
+        const payload = { from: 'CAD', to: 'USD', amount: 1, [field]: code };
+        const message = typeof code === 'string'
+          ? `Missing required field "${field}".`
+          : `Invalid field "${field}", expected a non-empty string.`;
+        assert.throws(() => convertCurrency(payload), { statusCode: 400, message });
+      });
+    }
+  }
+});
+
+test('rejects unsupported source and target currencies', async (t) => {
+  for (const field of ['from', 'to']) {
+    for (const code of ['INR', 'MXN', 'NZD']) {
+      await t.test(`${field}=${code}`, () => {
+        const payload = { from: 'CAD', to: 'USD', amount: 1, [field]: code };
+        assert.throws(
+          () => convertCurrency(payload),
+          {
+            statusCode: 400,
+            message: `Unsupported currency "${code.toUpperCase()}". Supported currencies are: CAD, USD, EUR, GBP, AUD, JPY`
+          }
+        );
+      });
+    }
+  }
+});
+
+test('rejects non-finite, non-numeric, and negative amounts', async (t) => {
+  for (const amount of ['1', NaN, Infinity, -Infinity, -0.01, {}, false]) {
+    await t.test(`amount=${String(amount)}`, () => {
+      assert.throws(
+        () => convertCurrency({ from: 'CAD', to: 'USD', amount }),
+        { statusCode: 400, message: "Invalid amount, expected a finite, non-negative number." }
+      );
+    });
+  }
+});
+
+test('rejects amounts where the converted value overflows', () => {
+  assert.throws(
+    () => convertCurrency({ from: 'USD', to: 'CAD', amount: Number.MAX_VALUE }),
+    { statusCode: 400, message: "Amount is too large to convert." }
+  );
 });
