@@ -69,15 +69,15 @@ export const createServer = () => http.createServer(async (req, res) => {
     const contentType = headers["content-type"];
     let pathname;
 
-    try {
-      pathname = new URL(url, `http://localhost`).pathname;
-    } catch {
+    if (typeof url !== "string") {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid request URL." }));
       return;
     }
 
-    if (typeof url !== "string") {
+    try {
+      pathname = new URL(url, `http://localhost`).pathname;
+    } catch {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid request URL." }));
       return;
