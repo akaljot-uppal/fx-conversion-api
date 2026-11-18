@@ -13,7 +13,7 @@ test('converts every supported currency pair', async (t) => {
           to,
           originalAmount: 100,
           convertedAmount: Number((100 * exchangeRate).toFixed(2)),
-          exchangeRate: Number(exchangeRate.toFixed(2))
+          exchangeRate
         });
       });
     }
@@ -29,6 +29,21 @@ test('correctly rounds amounts to two decimal places', () => {
     convertedAmount: 0.89,
     exchangeRate: 0.72
   });
+});
+
+test('rounds decimal half values correctly', () => {
+  const result = convertCurrency({ from: 'CAD', to: 'CAD', amount: 1.005 });
+  assert.equal(result.originalAmount, 1.01);
+  assert.equal(result.convertedAmount, 1.01);
+});
+
+test('returns the exchange rate used for conversion without rounding it', () => {
+  const result = convertCurrency({ from: 'JPY', to: 'GBP', amount: 1000 });
+  assert.equal(result.exchangeRate, EXCHANGE_RATES.GBP / EXCHANGE_RATES.JPY);
+  assert.equal(
+    result.convertedAmount,
+    Number((1000 * result.exchangeRate).toFixed(2))
+  );
 });
 
 test('correctly normalizes currency codes', () => {
