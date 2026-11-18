@@ -63,7 +63,7 @@ const parseRequestBody = (req) =>
     });
   });
 
-const server = http.createServer(async (req, res) => {
+export const createServer = () => http.createServer(async (req, res) => {
   try {
     const { method, url, headers } = req;
     const contentType = headers["content-type"];
@@ -131,6 +131,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+createServer().listen(PORT, () => {
   console.log(`fx-conversion-api listening on http://localhost:${PORT}`);
 });
