@@ -7,12 +7,14 @@ export const EXCHANGE_RATES = Object.freeze({
   JPY: 109.5,
 });
 
+// Create an error object with a status code and message
 export const createError = (statusCode, message) => {
   const error = new Error(message);
   error.statusCode = statusCode;
   return error;
 };
 
+// Round a number to two decimal places or keep as is if too large
 const roundToTwoDecimals = (value) => {
   if (Math.abs(value) >= 1e21) {
     return value;
@@ -20,6 +22,7 @@ const roundToTwoDecimals = (value) => {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 };
 
+// Validate currency code and normalize it to uppercase
 const normalizeCurrencyCode = (code, field) => {
   if (typeof code !== "string") {
     throw createError(
@@ -34,6 +37,7 @@ const normalizeCurrencyCode = (code, field) => {
   return normalizedCode;
 };
 
+// Validate the conversion request payload and return normalized values
 const validateConversionRequest = (payload) => {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
     throw createError(
@@ -80,6 +84,7 @@ const validateConversionRequest = (payload) => {
   return { to, from, amount };
 };
 
+// Convert currency based on the validated request payload
 export const convertCurrency = (payload) => {
   const { from, to, amount } = validateConversionRequest(payload);
 

@@ -3,15 +3,18 @@ import { convertCurrency, createError } from "./src/currencyService.js";
 
 const MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024;
 
+// Function to send a JSON response with dynamic status code and body
 const sendJsonResponse = (res, statusCode, body) => {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
   res.end(JSON.stringify(body));
 };
 
+// Function to check if the Content-Type header indicates JSON
 const isJsonContentType = (contentType) =>
   typeof contentType === "string" &&
   /^application\/(?:[\w.-]+\+)?json(?:\s*;|$)/i.test(contentType);
 
+// Parse the request body and return parsed JSON object or throw error if invalid
 const parseRequestBody = (req) =>
   new Promise((resolve, reject) => {
     const chunks = [];
@@ -68,6 +71,7 @@ const parseRequestBody = (req) =>
     });
   });
 
+// Create an HTTP server and validate requests before starting currency conversion
 export const createServer = () =>
   http.createServer(async (req, res) => {
     try {
@@ -135,6 +139,7 @@ server.on("error", (error) => {
   }
 });
 
+// Start the server and listen on the specified port
 server.listen(PORT, () => {
   console.log(`fx-conversion-api listening on http://localhost:${PORT}`);
 });
