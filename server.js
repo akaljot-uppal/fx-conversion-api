@@ -68,54 +68,62 @@ const parseRequestBody = (req) =>
     });
   });
 
-export const createServer = () => http.createServer(async (req, res) => {
-  try {
-    const { method, url, headers } = req;
-    const contentType = headers["content-type"];
-    let pathname;
-
-    if (typeof url !== "string") {
-      sendJsonResponse(res, 400, { error: "Invalid request URL." });
-      return;
-    }
-
+export const createServer = () =>
+  http.createServer(async (req, res) => {
     try {
-      pathname = new URL(url, `http://localhost`).pathname;
-    } catch {
-      sendJsonResponse(res, 400, { error: "Invalid request URL." });
-      return;
+      const { method, url, headers } = req;
+      const contentType = headers["content-type"];
+      let pathname;
+
+      if (typeof url !== "string") {
+        sendJsonResponse(res, 400, { error: "Invalid request URL." });
+        return;
+      }
+
+      try {
+        pathname = new URL(url, `http://localhost`).pathname;
+      } catch {
+        sendJsonResponse(res, 400, { error: "Invalid request URL." });
+        return;
+      }
+
+      if (pathname !== "/convert") {
+        sendJsonResponse(res, 404, {
+          error: "Endpoint not found. Use POST /convert.",
+        });
+        return;
+      }
+
+      if (method !== "POST") {
+        sendJsonResponse(res, 405, {
+          error:
+            "Method Not Allowed, only POST requests are allowed for this endpoint",
+        });
+        return;
+      }
+
+      if (!isJsonContentType(contentType)) {
+        sendJsonResponse(res, 400, {
+          error: "Invalid Content-Type, expected application/json.",
+        });
+        return;
+      }
+
+      const payload = await parseRequestBody(req);
+      const result = convertCurrency(payload);
+
+      sendJsonResponse(res, 200, result);
+    } catch (error) {
+      const statusCode = Number.isInteger(error?.statusCode)
+        ? error.statusCode
+        : 500;
+      const message =
+        statusCode === 500
+          ? "An unexpected error occurred while processing the conversion request."
+          : error.message;
+      sendJsonResponse(res, statusCode, { error: message });
     }
-
-    if (pathname !== "/convert") {
-      sendJsonResponse(res, 404, { error: "Endpoint not found. Use POST /convert." });
-      return;
-    }
-
-    if (method !== "POST") {
-      sendJsonResponse(res, 405, { error: "Method Not Allowed, only POST requests are allowed for this endpoint" });
-      return;
-    }
-
-    if (!isJsonContentType(contentType)) {
-      sendJsonResponse(res, 400, { error: "Invalid Content-Type, expected application/json." });
-      return;
-    }
-
-    const payload = await parseRequestBody(req);
-    const result = convertCurrency(payload);
-
-    sendJsonResponse(res, 200, result);
-  } catch (error) {
-    const statusCode = Number.isInteger(error?.statusCode)
-      ? error.statusCode
-      : 500;
-    const message =
-      statusCode === 500
-        ? "An unexpected error occurred while processing the conversion request."
-        : error.message;
-    sendJsonResponse(res, statusCode, { error: message });
-  }
-});
+  });
 
 const PORT = process.env.PORT || 3000;
 const server = createServer();
