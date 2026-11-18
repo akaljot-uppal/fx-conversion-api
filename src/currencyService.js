@@ -13,6 +13,13 @@ export const createError = (statusCode, message) => {
   return error;
 };
 
+const roundToTwoDecimals = (value) => {
+  if (Math.abs(value) >= 1e21) {
+    return value;
+  }
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+};
+
 const normalizeCurrencyCode = (code, field) => {
   if (typeof code !== "string") {
     throw createError(
@@ -87,8 +94,8 @@ export const convertCurrency = (payload) => {
   return {
     from,
     to,
-    originalAmount: Number(amount.toFixed(2)),
-    convertedAmount: Number(convertedAmount.toFixed(2)),
-    exchangeRate: Number(exchangeRate.toFixed(2)),
+    originalAmount: roundToTwoDecimals(amount),
+    convertedAmount: roundToTwoDecimals(convertedAmount),
+    exchangeRate,
   };
 };
