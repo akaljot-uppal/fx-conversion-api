@@ -81,7 +81,7 @@ export const createServer = () =>
       }
 
       try {
-        pathname = new URL(url, `http://localhost`).pathname;
+        pathname = new URL(url, "http://localhost").pathname;
       } catch {
         sendJsonResponse(res, 400, { error: "Invalid request URL." });
         return;

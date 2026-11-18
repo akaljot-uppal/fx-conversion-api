@@ -24,12 +24,12 @@ const normalizeCurrencyCode = (code, field) => {
   if (typeof code !== "string") {
     throw createError(
       400,
-      `Invalid field "${field}", expected a non-empty string.`,
+      `Invalid field '${field}', expected a non-empty string.`,
     );
   }
   const normalizedCode = code.trim().toUpperCase();
   if (!normalizedCode) {
-    throw createError(400, `Missing required field "${field}".`);
+    throw createError(400, `Missing required field '${field}'.`);
   }
   return normalizedCode;
 };
@@ -59,14 +59,14 @@ const validateConversionRequest = (payload) => {
   if (!Object.hasOwn(EXCHANGE_RATES, from)) {
     throw createError(
       400,
-      `Unsupported currency "${from}". Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(", ")}`,
+      `Unsupported currency '${from}'. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(", ")}`,
     );
   }
 
   if (!Object.hasOwn(EXCHANGE_RATES, to)) {
     throw createError(
       400,
-      `Unsupported currency "${to}". Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(", ")}`,
+      `Unsupported currency '${to}'. Supported currencies are: ${Object.keys(EXCHANGE_RATES).join(", ")}`,
     );
   }
 
