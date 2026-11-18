@@ -3,6 +3,11 @@ import { convertCurrency, createError } from "./src/currencyService.js";
 
 const MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024;
 
+const sendJsonResponse = (res, statusCode, body) => {
+  res.writeHead(statusCode, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(body));
+};
+
 const isJsonContentType = (contentType) =>
   typeof contentType === "string" &&
   /^application\/(?:[\w.-]+\+)?json(?:\s*;|$)/i.test(contentType);
@@ -70,53 +75,36 @@ export const createServer = () => http.createServer(async (req, res) => {
     let pathname;
 
     if (typeof url !== "string") {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Invalid request URL." }));
+      sendJsonResponse(res, 400, { error: "Invalid request URL." });
       return;
     }
 
     try {
       pathname = new URL(url, `http://localhost`).pathname;
     } catch {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Invalid request URL." }));
+      sendJsonResponse(res, 400, { error: "Invalid request URL." });
       return;
     }
 
     if (pathname !== "/convert") {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({ error: "Endpoint not found. Use POST /convert." }),
-      );
+      sendJsonResponse(res, 404, { error: "Endpoint not found. Use POST /convert." });
       return;
     }
 
     if (method !== "POST") {
-      res.writeHead(405, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({
-          error:
-            "Method Not Allowed, only POST requests are allowed for this endpoint",
-        }),
-      );
+      sendJsonResponse(res, 405, { error: "Method Not Allowed, only POST requests are allowed for this endpoint" });
       return;
     }
 
     if (!isJsonContentType(contentType)) {
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({
-          error: "Invalid Content-Type, expected application/json.",
-        }),
-      );
+      sendJsonResponse(res, 400, { error: "Invalid Content-Type, expected application/json." });
       return;
     }
 
     const payload = await parseRequestBody(req);
     const result = convertCurrency(payload);
 
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(result));
+    sendJsonResponse(res, 200, result);
   } catch (error) {
     const statusCode = Number.isInteger(error?.statusCode)
       ? error.statusCode
@@ -125,8 +113,7 @@ export const createServer = () => http.createServer(async (req, res) => {
       statusCode === 500
         ? "An unexpected error occurred while processing the conversion request."
         : error.message;
-    res.writeHead(statusCode, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: message }));
+    sendJsonResponse(res, statusCode, { error: message });
   }
 });
 
