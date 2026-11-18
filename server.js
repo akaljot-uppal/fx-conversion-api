@@ -3,6 +3,10 @@ import { convertCurrency, createError } from "./src/currencyService.js";
 
 const MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024;
 
+const isJsonContentType = (contentType) =>
+  typeof contentType === "string" &&
+  /^application\/(?:[\w.-]+\+)?json(?:\s*;|$)/i.test(contentType);
+
 const parseRequestBody = (req) =>
   new Promise((resolve, reject) => {
     const chunks = [];
@@ -36,6 +40,17 @@ const parseRequestBody = (req) =>
       try {
         const rawBody = Buffer.concat(chunks).toString();
         const body = JSON.parse(rawBody);
+
+        if (!body || typeof body !== "object" || Array.isArray(body)) {
+          reject(
+            createError(
+              400,
+              "Invalid request payload, expected a JSON object with 'from', 'to', and 'amount' fields.",
+            ),
+          );
+          return;
+        }
+
         resolve(body);
       } catch {
         reject(
@@ -50,7 +65,8 @@ const parseRequestBody = (req) =>
 
 const server = http.createServer(async (req, res) => {
   try {
-    const { method, url } = req;
+    const { method, url, headers } = req;
+    const contentType = headers["content-type"];
     let pathname;
 
     try {
@@ -81,6 +97,16 @@ const server = http.createServer(async (req, res) => {
         JSON.stringify({
           error:
             "Method Not Allowed, only POST requests are allowed for this endpoint",
+        }),
+      );
+      return;
+    }
+
+    if (!isJsonContentType(contentType)) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          error: "Invalid Content-Type, expected application/json.",
         }),
       );
       return;
