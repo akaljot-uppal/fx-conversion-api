@@ -131,4 +131,4 @@ curl.exe -X POST http://localhost:3000/convert `
 ## Notes
 
 - The conversion formula: `targetAmount = sourceAmount * (targetRate / sourceRate)`.
-- Returned numeric values are rounded to two decimal places.
+- Returned amounts are rounded to two decimal places; `exchangeRate` retains full precision.
