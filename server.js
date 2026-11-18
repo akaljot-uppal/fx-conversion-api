@@ -131,6 +131,15 @@ export const createServer = () => http.createServer(async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-createServer().listen(PORT, () => {
+const server = createServer();
+
+server.on("error", (error) => {
+  console.error("Server error:", error);
+  if (server.listening) {
+    server.close();
+  }
+});
+
+server.listen(PORT, () => {
   console.log(`fx-conversion-api listening on http://localhost:${PORT}`);
 });
