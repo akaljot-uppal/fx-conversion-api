@@ -132,3 +132,11 @@ curl.exe -X POST http://localhost:3000/convert `
 
 - The conversion formula: `targetAmount = sourceAmount * (targetRate / sourceRate)`.
 - Returned amounts are rounded to two decimal places; `exchangeRate` retains full precision.
+
+## The Use of AI
+In this project I have made use of AI tools. Specifically, I have made use of the VS Code Copilot Chat extension as my main tool.
+There are a couple of things that I used this tool for. The tool aided me in organizing the layout of my folders and files. The use of this tool allowed
+me to consider various types of error scenarios to consider when validating the payload, for example the max request size and URL/content-type
+validations. I also used to this to help highlight test cases that would be meaningful and reasonable to create, in addition to the cases I had already 
+developed. Based on all these suggestions I was able to develop in a more effective manner by cutting off more tedious and time-consuming tasks. The actual
+implementation and technical decisions were made and reviewed by me.
