@@ -12,12 +12,7 @@ This project exposes a single HTTP endpoint for currency conversion and uses the
 - Built with plain Node.js, no framework dependencies
 - Fixed exchange rates stored in code as a static map
 - CAD used as the base currency for calculations
-- Request validation for:
-  - missing fields
-  - invalid JSON
-  - unsupported currencies
-  - non-numeric or negative amounts
-  - oversized request bodies
+- Request validation is done prior to any calculation or conversion
 - Structured JSON responses for both success and error cases
 
 ## Supported Currencies
