@@ -74,7 +74,7 @@ Errors are returned as JSON with an `error` field:
 
 ```json
 {
-  "error": "Unsupported currency \"CHF\". Supported currencies are: CAD, USD, EUR, GBP, AUD, JPY"
+  "error": "Unsupported currency 'CHF'. Supported currencies are: CAD, USD, EUR, GBP, AUD, JPY"
 }
 ```
 
