@@ -86,7 +86,7 @@ Common validation errors include:
 
 **Note: Ensure you have [Node](https://nodejs.org/en/download) installed**  
 
-Install dependencies if needed (the project currently has no external dependencies), then start the server:
+Install dependencies using `npm install` (since the project has no external dependencies, this command is probably not needed), then start the server (`npm start` is needed for sure):
 
 ```bash
 npm install
@@ -97,7 +97,7 @@ The server listens on port `3000` by default, or on `process.env.PORT` if it is 
 
 ## Examples with curl
 
-Run the following command in a separate terminal while the API is running.
+Run the following command in a separate terminal while the API is running. I have provided 3 possible terminal options with their respective commands.
 
 ### Bash (Linux, macOS, or Git Bash)
 
